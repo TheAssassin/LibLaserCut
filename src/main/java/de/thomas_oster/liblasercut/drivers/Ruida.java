@@ -63,6 +63,7 @@ import java.net.URISyntaxException;
 
 /* for serial/usb i/o */
 import java.util.concurrent.TimeUnit;
+
 import purejavacomm.CommPort;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.NoSuchPortException;
@@ -159,19 +160,19 @@ public class Ruida extends LaserCutter
   @Override
   public LaserProperty getLaserPropertyForVectorPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
   public LaserProperty getLaserPropertyForRasterPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
   public LaserProperty getLaserPropertyForRaster3dPart()
   {
-    return new FloatMinMaxPowerSpeedFrequencyProperty();
+    return new FloatMinMaxPowerSpeedFocusFrequencyProperty();
   }
 
   @Override
@@ -649,7 +650,7 @@ public class Ruida extends LaserCutter
             case SETPROPERTY:
             {
               LaserProperty pr = cmd.getProperty();
-              FloatMinMaxPowerSpeedFrequencyProperty prop = (FloatMinMaxPowerSpeedFrequencyProperty) pr;
+              FloatMinMaxPowerSpeedFocusFrequencyProperty prop = (FloatMinMaxPowerSpeedFocusFrequencyProperty) pr;
               if (first_prop) {
                 first_prop = false;
                 currentMinPower = cmd_layer_percent("c631", part_number, currentMinPower, prop.getMinPower());
