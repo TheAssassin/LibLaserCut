@@ -93,6 +93,8 @@ public class Ruida extends LaserCutter
   protected static final String SETTING_MAX_POWER = "Max laser power (%)";
   protected static final String SETTING_BED_WIDTH = "Bed width (mm)";
   protected static final String SETTING_BED_HEIGHT = "Bed height (mm)";
+  protected static final String SETTING_FLIP_X = "Flip X Axis";
+  protected static final String SETTING_FLIP_Y = "Flip Y Axis";
   protected static final Locale FORMAT_LOCALE = Locale.US;
 
   protected static final String[] uploadMethodList = {UPLOAD_METHOD_FILE, UPLOAD_METHOD_IP, UPLOAD_METHOD_SERIAL};
@@ -137,6 +139,30 @@ public class Ruida extends LaserCutter
   public void setComport(String comport)
   {
     this.comport = comport;
+  }
+
+  protected boolean flipXaxis = false;
+
+  public boolean isFlipXaxis()
+  {
+    return flipXaxis;
+  }
+
+  public void setFlipXaxis(boolean flipXaxis)
+  {
+    this.flipXaxis = flipXaxis;
+  }
+
+  protected boolean flipYaxis = false;
+
+  public boolean isFlipYaxis()
+  {
+    return flipYaxis;
+  }
+
+  public void setFlipYaxis(boolean flipYaxis)
+  {
+    this.flipYaxis = flipYaxis;
   }
 
   /* -----------------------------------------------------------------------*/
@@ -232,10 +258,10 @@ public class Ruida extends LaserCutter
     /* compute bounding box */
     for (JobPart p : job.getParts())
     {
-      double min_x = Util.px2mm(p.getMinX(), p.getDPI());
-      double min_y = Util.px2mm(p.getMinY(), p.getDPI());
-      double max_x = Util.px2mm(p.getMaxX(), p.getDPI());
-      double max_y = Util.px2mm(p.getMaxY(), p.getDPI());
+      double min_x = isFlipXaxis() ? getBedWidth() - Util.px2mm(p.getMinX(), p.getDPI()) : Util.px2mm(p.getMinX(), p.getDPI());
+      double min_y = isFlipYaxis() ? getBedHeight() - Util.px2mm(p.getMinY(), p.getDPI()) : Util.px2mm(p.getMinY(), p.getDPI());
+      double max_x = isFlipXaxis() ? getBedWidth() - Util.px2mm(p.getMaxX(), p.getDPI()) : Util.px2mm(p.getMaxX(), p.getDPI());
+      double max_y = isFlipYaxis() ? getBedHeight() - Util.px2mm(p.getMaxY(), p.getDPI()) : Util.px2mm(p.getMaxY(), p.getDPI());
       if (first) {
         minX = min_x;
         maxX = max_x;
@@ -268,8 +294,8 @@ public class Ruida extends LaserCutter
 
   private void vector(double x, double y, double dpi, boolean as_cut, boolean force_abs) throws IOException
   {
-    double x_mm = Util.px2mm(x, dpi);
-    double y_mm = Util.px2mm(y, dpi);
+    double x_mm = isFlipXaxis() ? getBedWidth() - Util.px2mm(x, dpi) : Util.px2mm(x, dpi);
+    double y_mm = isFlipYaxis() ? getBedHeight() - Util.px2mm(y, dpi) : Util.px2mm(y, dpi);
     boolean as_absolute;
 
     /* compute distance to last known position */
@@ -954,6 +980,8 @@ public class Ruida extends LaserCutter
     SETTING_MAX_POWER,
     SETTING_BED_WIDTH,
     SETTING_BED_HEIGHT,
+    SETTING_FLIP_X,
+    SETTING_FLIP_Y,
   };
 
   @Override
@@ -980,6 +1008,10 @@ public class Ruida extends LaserCutter
       return this.getBedWidth();
     } else if (SETTING_BED_HEIGHT.equals(attribute)) {
       return this.getBedHeight();
+    } else if (SETTING_FLIP_X.equals(attribute)) {
+      return this.isFlipXaxis();
+    } else if (SETTING_FLIP_Y.equals(attribute)) {
+      return this.isFlipYaxis();
     }
     return null;
   }
@@ -1013,6 +1045,10 @@ public class Ruida extends LaserCutter
       this.setBedHeigth((Double)value);
     } else if (SETTING_BED_WIDTH.equals(attribute)) {
       this.setBedWidth((Double)value);
+    } else if (SETTING_FLIP_X.equals(attribute)) {
+      this.setFlipXaxis((Boolean) value);
+    } else if (SETTING_FLIP_Y.equals(attribute)) {
+      this.setFlipYaxis((Boolean) value);
     }
   }
 
